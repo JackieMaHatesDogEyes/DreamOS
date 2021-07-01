@@ -1,0 +1,62 @@
+-------------------------------------------------------------------------------
+To make a floppy image from Linux, use:
+dd if=dreamos.floppy of=/dev/fd0
+-------------------------------------------------------------------------------
+To recompile from Linux, use:
+dream make_image.scm
+-------------------------------------------------------------------------------
+In order to use SVGA graphics (1024x768x16) change the value of SVGA to #t
+in make.scm then recompile.
+-------------------------------------------------------------------------------
+Additional non-standard procedures include:
+-------------------------------------------------------------------------------
+(sys-read-byte INTEGER)       ==> INTEGER  ;;Read byte at address
+(sys-write-byte INTEGER1 INTEGER2)         ;;Write byte INTEGER1 to address
+(sys-in-byte INTEGER)         ==> INTEGER  ;;Read byte from port
+(sys-out-byte INTEGER1 INTEGER2)           ;;Write byte INTEGER1 to port
+(sys-in INTEGER)              ==> INTEGER  ;;Read from port
+(sys-out INTEGER1 INTEGER2)                ;;Write INTEGER1 to port
+(sys-mount)                                ;;Read all from hard disk
+(sys-save)                                 ;;Save all to hard disk
+(sys-read)                                 ;;Read all unread cylinders
+(sys-copy)                                 ;;Read all unread cylinders and
+                                           ;;    mark all as dirty
+(sys-mount-floppy)                         ;;Read first cylinder from floppy
+                                           ;;    and mark all others as unread
+(sys-write-floppy)                         ;;Write dirty cylinders to floppy
+(sys-file-list)               ==> LIST     ;;List of filenames
+(sys-boot)                                 ;;Reboot computer
+(sys-key-time)                             ;;Incremented during keyboard reads
+(sys-read-char)               ==> CHAR     ;;Unbuffered keyboard read-char
+(sys-echo [BOOLEAN])          ==> BOOLEAN  ;;Gets or sets echo of keyed chars
+(sys-free-memory)             ==> INTEGER  ;;Address of first free byte
+                                           ;;    (free from here to #x100000)
+(sys-call INTEGER STRING1 ...)==> INTEGER  ;;Push STRINGS on stack, Call
+                                           ;;    address INTEGER and return
+                                           ;;    INTEGER value of eax
+(sys-copy-image FILENAME INTEGER)          ;;Copy named file to address
+(sys-execute-file FILENAME STRING1 ...) ==> INTEGER
+(sys-rename-file FILENAME STRING)          ;;Rename named file
+(sys-delete-file FILENAME)                 ;;Delete named file
+(sys-file-exists? FILENAME)   ==> BOOLEAN  ;;Named file exists?
+(sys-create-file FILENAME)                 ;;Create new (empty) file
+-------------------------------------------------------------------------------
+(vga-clear)                                ;;Clear display
+(vga-clear-row)                            ;;Clear from cursor to end of row
+(vga-scroll-up)                            ;;Scroll text up SCROLL_ROWS rows
+(vga-position-x)              ==> INTEGER  ;;Get cursor column position
+(vga-position-y)              ==> INTEGER  ;;Get cursor row position
+(vga-set-position INTEGER_Y INTEGER_X)     ;;Move cursor to row and column
+(vga-set-attribute INTEGER)                ;;Set fore/background color (4 bit)
+-------------------------------------------------------------------------------
+;;When SVGA is #t:
+(vga-foreground)              ==> INTEGER  ;;Get current foreground color
+(vga-background)              ==> INTEGER  ;;Get current background color
+(vga-set-foreground INTEGER)               ;;Set foreground color (16 bits)
+(vga-set-background INTEGER)               ;;Set background color (16 bits)
+(vga-draw-box INTEGER_X INTEGER_Y
+              INTEGER_WIDTH INTEGER_HEIGHT);;Draw solid box
+(vga-draw-pixmap INTEGER_X INTEGER_Y LIST) ;;Draw LIST of LIST of pixels
+                        ;;Each pixel is an INTEGER color or '() for transparent
+(vga-draw-line INTEGER_X1 INTEGER_Y1 INTEGER_X2 INTEGER_Y2)
+-------------------------------------------------------------------------------

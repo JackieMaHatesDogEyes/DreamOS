@@ -1,0 +1,61 @@
+(load "make.scm")
+(display "Creating dreamos.floppy")(newline)
+(define out (open-output-file "dreamos.floppy"))
+(define (file-length-loop in len)
+  (if (eof-object? (read-char in))
+    len
+    (file-length-loop in (+ len 1))))
+(define (file-length f)
+  (let* ((in (open-input-file f))
+         (len (file-length-loop in 0)))
+    (close-input-port in)
+    len))
+(define (image-file-loop in)
+  (let ((c (read-char in)))
+    (if (not (eof-object? c))
+      (begin
+        (write-char c out)
+        (image-file-loop in)))))
+(define (image-file f)
+  (let ((in (open-input-file f)))
+    (image-file-loop in)
+    (close-input-port in)))
+(define boot-len (image-file "boot.img"))
+(define offset 512)
+(define (display-tetra n)
+  (write-char (integer->char (remainder n #x100)) out)
+  (write-char (integer->char (remainder (quotient n #x100) #x100)) out)
+  (write-char (integer->char (remainder (quotient n #x10000) #x100)) out)
+  (write-char (integer->char (remainder (quotient n #x1000000) #x100)) out))
+(define files
+  '("dream.img" "bootstrap.scm" "init.scm" "README" "README_DREAMOS"
+    "x86.scm" "boot.scm" "bss.scm" "char.scm" "compiler.scm"
+    "control.scm" "data.scm" "dream.scm" "dreamos.scm" "edit.scm"
+    "extra.scm" "floppy.scm" "global.scm" "hd.scm" "icon.scm"
+    "list.scm" "make.scm" "make_image.scm" "mp.scm" "number.scm"
+    "osbss.scm" "osdata.scm" "pixmaps" "pred.scm" "r4rstest.scm"
+    "splash.txt" "string.scm" "svga.scm" "vector.scm" "vga.scm"))
+(define CYLINDER_SIZE (* 36 512))
+(define file-offset 0)
+(define (make-file-entry f)
+  (display-tetra file-offset)
+  (display-tetra 0)
+  (let ((len (file-length f)))
+    (display-tetra len)
+    (set! file-offset (+ file-offset len))
+    (display f out)
+    (display (make-string (- 24 (string-length f))) out))
+  (set! offset (+ offset 36)))
+(make-file-entry "boot.img")
+(set! file-offset CYLINDER_SIZE)
+(for-each make-file-entry
+  files)
+;;;End marker
+(display-tetra (* 36 512 80))
+(display-tetra #xffffffff)
+(display-tetra #xffffffff)
+(display (make-string 24) out)
+(set! offset (+ offset 36))
+(display (make-string (- CYLINDER_SIZE offset)) out)
+(for-each image-file files)
+(close-output-port out)
